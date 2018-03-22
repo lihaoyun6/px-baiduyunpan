@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         PX-百度云盘
 // @namespace    https://github.com/lihaoyun6/px-baiduyunpan
-// @version      0.10.1
+// @version      0.10.2
 // @description  百度网盘文件直链提取, 支持一键发送至proxyee-down进行下载
 // @author       lihaoyun6
 // @license      MIT
 // @supportURL   https://github.com/lihaoyun6/px-baiduyunpan/issues
-// @date         01/01/2017
-// @modified     02/13/2017
+// @date         01/01/2018
+// @modified     22/03/2018
 // @match        *://pan.baidu.com/disk/home*
 // @match        *://yun.baidu.com/disk/home*
 // @match        *://pan.baidu.com/s/*
@@ -140,13 +140,13 @@
 		};
 		var PAGE_CONFIG = {
 			pan: {
-				prefix: 'file-widget-1:',
+				prefix: 'function-widget-1:',
 				containers: ['.g-button:has(.icon-download):visible'],
 				style: function() {}
 			},
 			share: {
-				prefix: 'file-widget-1:',
-				containers: ['.KKtwaH .button-box>.g-button:has(.icon-download)', '.module-share-top-bar .button-box>.g-button:has(.icon-download)'],
+				prefix: 'function-widget-1:',
+				containers: ['.KKtwaH .x.button-box>.g-button:has(.icon-download)', '.module-share-top-bar .x.button-box>.g-button:has(.icon-download)'],
 				style: function() {
 					var styleList = ['.KPDwCE .QxJxtg{z-index: 2;}', '.module-share-header .slide-show-right{width: auto;}', '.px-yunpan-dropdown-button.g-dropdown-button.button-open .menu{z-index:41;}', '.module-share-header .slide-show-header h2{width:230px;}', '.KPDwCE .xGLMIab .g-dropdown-button.px-yunpan-dropdown-button{margin: 0 5px;}'];
 					GM_addStyle(styleList.join(''));
@@ -274,7 +274,7 @@
 							dServ.getDlinkPan(dServ.getFsidListData(e), e.isdir === 1 ? 'batch': 'nolimit', cb, undefined, undefined, 'POST');
 						};
 					} else {
-						var yunData = require((currentProduct === 'share' ? 'disk-share:widget/system': 'page-common:widget') + '/data/yunData.js').get();
+						var yunData = require((currentProduct === 'share' ? 'disk-share:widget': 'page-common:widget') + '/data/yunData.js').get();
 						requestMethod = function(e, cb) {
 							dServ.getDlinkShare({
 								share_id: yunData.shareid,
@@ -445,6 +445,11 @@
 		var $ = require('base:widget/libs/jquerypacket.js');
 		var pageInfo = require('px-yunpan:pageInfo');
 		var prefix = pageInfo.prefix;
+		require.async(prefix + 'download/util/context.js', function(e) {
+		           e.getContext = function() {
+		               return ctx;
+		           };
+		       });
 		var dmPromise = new Promise(function(resolve, reject) {
 			$(unsafeWindow).on('load',
 			function() {
