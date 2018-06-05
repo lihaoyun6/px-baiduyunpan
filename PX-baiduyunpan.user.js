@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         PX-百度云盘
 // @namespace    https://github.com/lihaoyun6/px-baiduyunpan
-// @version      0.10.3
+// @version      0.10.7
 // @description  百度网盘文件直链提取, 支持一键发送至proxyee-down进行下载
 // @author       lihaoyun6
 // @license      MIT
 // @supportURL   https://github.com/lihaoyun6/px-baiduyunpan/issues
 // @date         01/01/2018
-// @modified     23/03/2018
+// @modified     05/06/2018
 // @match        *://pan.baidu.com/disk/home*
 // @match        *://yun.baidu.com/disk/home*
 // @match        *://pan.baidu.com/s/*
@@ -23,6 +23,7 @@
 // @grant        GM_xmlhttpRequest
 // @require      https://cdn.bootcss.com/jquery/1.7.1/jquery.min.js
 // @require      https://cdn.bootcss.com/clipboard.js/1.5.16/clipboard.min.js
+// @icon         https://www.baidu.com/favicon.ico
 // ==/UserScript==
 
 (function(require, define, Promise) {
@@ -386,6 +387,17 @@
 				clipboard.on('error', function(e) {
 					ctx.ui.tip({ mode: 'caution', msg: '失败' });
 				});
+				var urlnow = location.href;
+				if(urlnow.indexOf('pan.baidu.com/disk/home') > 0 ){
+					alert('由于百度云文件解析策略调整\n请使用"分享"功能将需要下载的文件进行分享\n再前往分享链接界面导出下载');
+					return false;
+					} else if(urlnow.indexOf('yun.baidu.com/disk/home') > 0 ) {
+						alert('由于百度云文件解析策略调整\n请使用"分享"功能将需要下载的文件进行分享\n再前往分享链接界面导出下载');
+						return false;
+					} else if(urlnow.indexOf('eyun.baidu.com/enterprise') > 0 ) {
+						alert('由于百度云文件解析策略调整\n请使用"分享"功能将需要下载的文件进行分享\n再前往分享链接界面导出下载');
+						return false;
+					}
 				var proxyeethread = window.localStorage ? localStorage.getItem("proxyeethread") : Cookie.read("proxyeethread");
 					if (!proxyeethread) {
 						var proxyeethread = "32";
@@ -404,8 +416,8 @@
 							Cookie.write("proxyeepath", proxyeepath);
 						}
 					}
-				    var showurlss = dlinks.join('\n');
-				    var showurls = showurlss.replace(/d.pcs.baidu.com/g, 'pcs.baidu.com');
+				    var showurls = dlinks.join('\n');
+				    //var showurls = showurlss.replace(/d.pcs.baidu.com/g, 'pcs.baidu.com');
 					var text = '<textarea id="bar" rows="' + ((dlinks.length > 20 ? 20 : dlinks.length) + 1) + '" style="width:100%;white-space: nowrap;">' + showurls + '</textarea><br><br><label for="txt">proxyee-down下载线程数: </label><input type="text" id="proxyeethread" style="white-space: nowrap;" value="' + proxyeethread + '"><br><br><label for="txt">proxyee-down下载路径: </label><input type="text" id="proxyeepath" style="white-space: nowrap;" value="' + proxyeepath + '">';
 					var filenames;
 					var foldersList = selectedList.filter(function(e) {
@@ -440,8 +452,8 @@
 						}
 					});
 					//alert(filenames);
-					var urlss = dlinks.join('|');
-				    var urls = urlss.replace(/d.pcs.baidu.com/g, 'pcs.baidu.com');
+					var urls = dlinks.join('|');
+				    //var urls = urlss.replace(/d.pcs.baidu.com/g, 'pcs.baidu.com');
 				    //alert(urls);
 					var dialog = ctx.ui.confirm({
 						title: 'proxyee-down下载',
@@ -481,10 +493,11 @@
 			$(unsafeWindow).on('load', function() {
 				reject('downloadManager.js');
 			});
-			require.async(prefix + 'download/service/downloadManager.js', function(dm) {
+			resolve();
+			/*require.async(prefix + 'download/service/downloadManager.js', function(dm) {
 				dm.MODE_PRE_INSTALL = dm.MODE_PRE_DOWNLOAD;
 				resolve();
-			});
+			});*/
 		});
 		var gjcPromise = new Promise(function(resolve, reject) {
 			$(unsafeWindow).on('load', function() {
@@ -503,7 +516,8 @@
 			$(unsafeWindow).on('load', function() {
 				reject('downloadDirectService.js');
 			});
-			require.async(prefix + 'download/service/downloadDirectService.js', function(dDS) {
+			resolve();
+			/*require.async(prefix + 'download/service/downloadDirectService.js', function(dDS) {
 				var $preDlFrame = null;
 				var _ = dDS.straightforwardDownload;
 				if (typeof _ !== 'function') return;
@@ -520,7 +534,7 @@
 					_.apply(dDS, arguments);
 				};
 				resolve();
-			});
+			});*/
 		});
 		Promise.all([dmPromise, gjcPromise, ddsPromise]).then(function() {
 			try {
